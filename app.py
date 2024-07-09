@@ -4,6 +4,8 @@ import haversine as hs
 from haversine import Unit
 import pickle
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 svm_model_path = 'svm_model.pkl'
 with open(svm_model_path, 'rb') as file:
@@ -12,6 +14,7 @@ with open(svm_model_path, 'rb') as file:
 # voting_model_path = 'voting_model.pkl'
 # with open(voting_model_path, 'rb') as file:
 #     voting_model = pickle.load(file)
+df=pd.read_csv('updated-amazon-time.csv')
 
 def predict_speed(model, features):
     return model.predict(features)
@@ -78,7 +81,41 @@ if st.button("Calculate Time "):
     # time2 = np.array(time2).item()
 
         # Display results with ±5 minutes buffer
-    st.write(f'Predicted travel time range: {(time1-10):.2f} to {(time1 + 5):.2f} minutes')
+    st.header(f'Predicted travel time range: {(time1-10):.2f} to {(time1 + 5):.2f} minutes')
+    st.header("Analysis based on similar conditions from previous deliveries")
+    filtered_user_data = df[
+        (df['Distance_KM'] >= (distance - 2)) & (df['Distance_KM'] <= (distance + 2)) &
+        (df['Agent_Age'] >= (agent_age - 2)) & (df['Agent_Age'] <= (agent_age + 2)) &
+        (df['Agent_Rating'] >= (agent_rating - 0.3)) & (df['Agent_Rating'] <= (agent_rating + 0.3)) &
+        (df['Weather'] == weather) &
+        (df['Traffic'] == traffic) &
+        (df['Vehicle'] == vehicle) &
+        (df['Area'] == area)
+    ]
+    if not filtered_user_data.empty:
+    
+    # Display filtered user data
+           mean_travel_time = filtered_user_data['Delivery_Time'].mean()
+           st.write(f'Mean travel time based on previous deliveries: {mean_travel_time:.2f} minutes')
+           col5,col6 = st.columns(2)
+           with col5:
+               fig, ax = plt.subplots()
+               sns.histplot(filtered_user_data['Delivery_Time'], kde=True, bins=20, ax=ax)
+               ax.set_title('Distribution of Travel Times')
+               ax.set_xlabel('Travel Time (minutes)')
+               ax.set_ylabel('Frequency')
+               st.pyplot(fig)
+           
+           with col6:
+               fig, ax = plt.subplots()
+               scatter = ax.scatter(filtered_user_data['Distance_KM'], filtered_user_data['Delivery_Time'], c=filtered_user_data['Agent_Rating'], cmap='viridis')
+               ax.set_title('Distance vs Travel Time')
+               ax.set_xlabel('Distance (km)')
+               ax.set_ylabel('Travel Time (minutes)')
+               fig.colorbar(scatter, label='Agent Rating')
+               st.pyplot(fig)
+    else :
+        st.write("No similar data found based on current conditions")
    
 else:
     st.write("Please enter the distance or calculate it using the latitude and longitude.")
