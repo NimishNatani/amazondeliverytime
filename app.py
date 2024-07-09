@@ -25,10 +25,8 @@ def calculate_travel_time(distance, speed):
 def calculate_distance(pickup_lat, pickup_long, drop_lat, drop_long):
     return hs.haversine((pickup_lat, pickup_long), (drop_lat,drop_long), unit=Unit.KILOMETERS)
 
-# Streamlit app
 st.title('Travel Time Predictor')
 
-# User input for method of distance entry
 distance_method = st.radio('How would you like to enter the distance?', ('Latitude/Longitude', 'Distance in Kilometers'))
 
 if distance_method == 'Latitude/Longitude':
@@ -56,7 +54,6 @@ vehicle = st.selectbox('Vehicle Type', ['scooter', 'motorcycle'])
 area = st.selectbox('Area Type', ['Urban', 'Metropolitian', 'Other'])
 traffic = st.selectbox('Traffic Conditions', ['Low', 'Medium', 'High', 'Jam'])
 
-# Prepare feature vector
 if st.button("Calculate Time "):
     input_df = pd.DataFrame({
         'Agent_Age': [agent_age],
@@ -68,19 +65,12 @@ if st.button("Calculate Time "):
         'Area': [area]
     })
 
-    # Predict speed using both models
     speed1 = predict_speed(svm_model, input_df)
-    # speed2 = predict_speed(voting_model, input_df)
 
-    # Calculate travel time in minutes
     time1 = calculate_travel_time(distance, speed1)
-    # time2 = calculate_travel_time(distance, speed2)
 
-    # Display results
     time1 = np.array(time1).item()
-    # time2 = np.array(time2).item()
 
-        # Display results with ±5 minutes buffer
     st.header(f'Predicted travel time range: {(time1-10):.2f} to {(time1 + 5):.2f} minutes')
     st.header("Analysis based on similar conditions from previous deliveries")
     filtered_user_data = df[
@@ -94,7 +84,6 @@ if st.button("Calculate Time "):
     ]
     if not filtered_user_data.empty:
     
-    # Display filtered user data
            mean_travel_time = filtered_user_data['Delivery_Time'].mean()
            st.write(f'Mean travel time based on previous deliveries: {mean_travel_time:.2f} minutes')
            col5,col6 = st.columns(2)
