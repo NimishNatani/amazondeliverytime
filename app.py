@@ -71,7 +71,7 @@ if st.button("Calculate Time "):
 
     time1 = np.array(time1).item()
 
-    st.header(f'Predicted travel time range: {(time1-10):.2f} to {(time1 + 5):.2f} minutes')
+    st.header(f'Predicted travel time range: {(time1-5):.2f} to {(time1 + 5):.2f} minutes')
     st.header("Analysis based on similar conditions from previous deliveries")
     filtered_user_data = df[
         (df['Distance_KM'] >= (distance - 2)) & (df['Distance_KM'] <= (distance + 2)) &
